@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const authController = {
     login : (req , res) =>{
          // these values are here becuase of express.json() middleware
-        const { username , password } = req.body;
+        const {username , password} = req.body;
+        // console.log("Recived req for : " , username);
 
         if(username == 'admin' && password == 'admin'){
 
@@ -31,7 +32,9 @@ const authController = {
         res.json({message:'User logged out successfully'});
     },
     isUserLoggedIn:(request,response)=>{
+        
         const token=request.cookies.jwtToken;
+        
         if(!token){
             return response.status(401).json({message:'Unauthorized access'});
         }

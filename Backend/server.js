@@ -5,10 +5,16 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./src/routes/authRoutes");
 //middlewares
-app.use(cors());
 app.use(express.json()); //it is used to parse JSON bodies
 app.use(cookieParser());
 dotenv.config();
+
+const corsOptions = {
+  origin : 'http://localhost:5173' ,  // 
+  credentials : true, //allow cookies to be sent
+}
+app.use(cors(corsOptions));
+
 
 app.use('/auth' , authRoutes );
 
