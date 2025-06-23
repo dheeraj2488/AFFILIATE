@@ -4,13 +4,20 @@ const dotenv = require("dotenv");
 const app = express();
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./src/routes/authRoutes");
+const mongoose = require("mongoose");
 //middlewares
 app.use(express.json()); //it is used to parse JSON bodies
 app.use(cookieParser());
 dotenv.config();
 
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(()=> console.log("MongoDB connected successfully"));
+
+
 const corsOptions = {
-  origin : 'http://localhost:5173' ,  // 
+  origin : process.env.CLIENT_ENDPOINT ,  // 
   credentials : true, //allow cookies to be sent
 }
 app.use(cors(corsOptions));
