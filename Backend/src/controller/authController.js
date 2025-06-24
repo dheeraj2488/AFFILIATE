@@ -61,6 +61,36 @@ const authController = {
       }
     });
   },
+
+  register : async(req , res) =>{
+
+    try{  
+
+      const { username, password , name  } = req.body;
+      const encryptedPassword = await bcrypt.hash(password, 10);
+
+      // Check if user already exists
+      const existingUser = await Users.findOne({ email: username });
+      if( existingUser ) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+
+      const user = new Users({
+        email : username , 
+        password : encryptedPassword,
+        name : name
+      });
+
+      await user.save();
+
+      res.status(200).json({ message: "User registered successfully" });
+
+    }catch(err){
+      console.log(err);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
 };
 
 module.exports = authController;
