@@ -1,16 +1,22 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-const Logout = ({updateUserDetails}) => {
+import { useDispatch } from 'react-redux';
+import { serverEndpoint } from '../config';
+const Logout = () => {
+
+    const dispatch  = useDispatch();
     const navigate = useNavigate();
     const handleLogout = async () => {
         try {
-            const response = await axios.post('http://localhost:6001/auth/logout',{} ,  {
+            const response = await axios.post(`${serverEndpoint}/auth/logout`,{} ,  {
                 withCredentials : true // This ensures that cookies are sent with the request
             });
            
             if(response.data.success){
-                updateUserDetails(null); // Clear user details on logout
+                dispatch({
+                    type : 'CLEAR_USER',
+                }) // Clear user details on logout
                 navigate('/login'); // Redirect to login page
             }
        

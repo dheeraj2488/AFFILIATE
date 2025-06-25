@@ -8,6 +8,7 @@ function App() {
       <h1>Welcome to Home Page</h1>
       <Link to='/'>Home</Link>
       <Link to='/login'>Login</Link>
+      <Link to='/register'> Register </Link>
     </div>
   );
 }

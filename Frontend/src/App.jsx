@@ -7,22 +7,31 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Logout from "./pages/Logout";
 import Error from "./pages/Error";
+import Register from "./pages/Register";
+import { useDispatch, useSelector } from "react-redux";
+import { serverEndpoint } from "./config";
+
 function App() {
-  const [UserDetails, setUserDetails] = useState(null);
-  const updateUserDetails = (updatedData) => {
-    setUserDetails(updatedData);
-  };
+
+
+  const UserDetails = useSelector((state) => state.userDetails);
+  const dispatch = useDispatch();
+
+ 
 
   const isUserLoggedIn = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:6001/auth/isUserLoggedIn",
+        `${serverEndpoint}/auth/isUserLoggedIn`,
         {
           withCredentials: true,
         }
       );
 
-      updateUserDetails(response.data.userDetails);
+      dispatch({
+        type: "SET_USER",
+        payload: response.data.userDetails,
+      });
     } catch (error) {
       console.error("Error checking user login status:", error);
     }
@@ -54,7 +63,7 @@ function App() {
               <Navigate to="/dashboard" />
             ) : (
               <AppLayout>
-                <Login updateUserDetails={updateUserDetails} />
+                <Login  />
               </AppLayout>
             )
           }
@@ -67,7 +76,7 @@ function App() {
 
         <Route
           path="/logout"
-          element={UserDetails ? <Logout  updateUserDetails={updateUserDetails}/> : <Navigate to="/login" />}
+          element={UserDetails ? <Logout/> : <Navigate to="/login" />}
         >
         </Route>
 
@@ -83,6 +92,8 @@ function App() {
             )
           }
         ></Route>
+
+        <Route path="/register" element={ <Register/> }></Route>
       </Routes>
     </>
   );
