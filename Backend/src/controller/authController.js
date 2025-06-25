@@ -1,8 +1,17 @@
 const jwt = require("jsonwebtoken");
 const Users = require("../model/Users");
 const bcrypt = require("bcryptjs");
+const { OAuth2Client } = require("google-auth-library");
+const { validationResult } = require("express-validator");
 const authController = {
+
+
   login: async (req, res) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(401).json({ errors: errors.array() });
+    }
     try {
       // these values are here becuase of express.json() middleware
       const { username, password } = req.body;
@@ -84,7 +93,70 @@ const authController = {
 
       await user.save();
 
-      res.status(200).json({ message: "User registered successfully" });
+      res.status(200).json({ success: true ,  message: "User registered successfully" });
+
+    }catch(err){
+      console.log(err);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  } , 
+
+  googleAuth : async (req, res) => {
+    
+    const {idToken } = req.body;
+
+    if(!idToken){
+      return res.status(400).json({ message: "invalid request" });
+    }
+
+    try{
+
+      const googleClinet = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const response = await googleClinet.verifyIdToken({
+        idToken: idToken,
+        audience: process.env.GOOGLE_CLIENT_ID // Specify the CLIENT_ID of the app that accesses the backend
+      })
+
+      const payload = response.getPayload();
+
+      const { sub : googleId , email , name } = payload;  
+
+      let data = await Users.findOne({ eamil: email });
+
+      if(!data){
+        //create new user
+        data = new Users({
+          email: email,
+          name: name,
+          isGoogleUser : true , 
+          googleId: googleId
+        });
+
+        await data.save();
+      }
+
+      const userDetails = {
+        id: data._id ? data._id : googleId , 
+        name: data.name,
+        email: data.email,
+
+      };
+
+      const token = jwt.sign({ userDetails }, process.env.JWT_SECRET_KEY, {
+        expiresIn: "1h",
+      });
+
+      res.cookie("jwtToken", token, {
+        //key and value and configuration
+        httpOnly: true, //only server can change the details
+        secure: true, //will only be accesible on https
+        domain: "localhost", // specified domain
+        path: "/", //available on which path on the browser ,here it is available for all pages
+      });
+
+      res.json({ message: "User authenticated", userDetails: userDetails });
+
+
 
     }catch(err){
       console.log(err);
