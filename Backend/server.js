@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const app = express();
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./src/routes/authRoutes");
+const linksRoutes = require("./src/routes/linksRoutes");
 const mongoose = require("mongoose");
 //middlewares
 app.use(express.json()); //it is used to parse JSON bodies
@@ -24,7 +25,7 @@ app.use(cors(corsOptions));
 
 
 app.use('/auth' , authRoutes );
-
+app.use('/links' , linksRoutes)
 
 const port = process.env.PORT || 6001;
 app.listen(port, (err) => {

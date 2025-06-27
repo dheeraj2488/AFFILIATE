@@ -7,17 +7,20 @@ const authController = {
 
 
   login: async (req, res) => {
-
+   
     const errors = validationResult(req);
+  
     if (!errors.isEmpty()) {
       return res.status(401).json({ errors: errors.array() });
     }
     try {
       // these values are here becuase of express.json() middleware
       const { username, password } = req.body;
-      // console.log("Recived req for : " , username);
+    
+      
+      console.log("Recived req for : " , username);
       const data = await Users.findOne({ email: username }); // if we will not use await code will move forward without waiting for fething the data
-
+      console.log("Data fetched from DB : ", data);
       if (!data) {
         return res.status(401).json({ message: "User not found" });
       }

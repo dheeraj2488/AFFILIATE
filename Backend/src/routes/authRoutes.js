@@ -8,13 +8,13 @@ const loginValidator = [
     .isEmail().withMessage('Username must be a valid email'),
 
     body('password').notEmpty().withMessage('Password is required')
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long')
 ];
   
 
 router.post('/login' ,loginValidator, authController.login);
 router.post('/logout' , authController.logout);
 router.get('/isUserLoggedIn', authController.isUserLoggedIn);
-router.post('/register' , authController.register);
+router.post('/register' ,loginValidator ,  authController.register);
 router.post('/google-auth', authController.googleAuth);
 module.exports = router;
