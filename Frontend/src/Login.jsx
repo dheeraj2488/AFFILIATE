@@ -50,6 +50,7 @@ function Login() {
              };
 
             try{    
+                
 
                  const response= await axios.post(`${serverEndpoint}/auth/login`,formData , configuration);
                 //  console.log(response);
@@ -94,8 +95,11 @@ function Login() {
         setErrors({ message: 'Something went wrong while google signin'});
      };
   return (
+
+
     <div className="container text-center">
-      <h1>Welcome to Login Page</h1>
+    
+      <h1 >Welcome to Login Page</h1>
     
 
       {errors.message && errors.message}
@@ -130,6 +134,7 @@ function Login() {
             <GoogleLogin onSuccess={handelGoogleSigin} onError={handleGoogleSigninFailure} />
         </GoogleOAuthProvider>
     </div>
+    
   );
 }
 
