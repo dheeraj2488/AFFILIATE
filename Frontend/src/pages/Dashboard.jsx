@@ -5,7 +5,7 @@ import LinkDashboard from './links/LinkDashboard'
 function Dashboard() {
   return (
     <div className='container text-center'>
-        <h1>User Dashboarde</h1>
+
         <LinkDashboard/>
         <Link to='/logout'> Logout </Link>
     </div>

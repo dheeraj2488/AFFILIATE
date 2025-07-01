@@ -10,11 +10,13 @@ import Error from "./pages/Error";
 import Register from "./pages/Register";
 import { useDispatch, useSelector } from "react-redux";
 import { serverEndpoint } from "./config";
+import Spinner from "./components/Spinner";
 
 function App() {
 
 
   const UserDetails = useSelector((state) => state.userDetails);
+  const [loading , setLoading] = useState(true);
   const dispatch = useDispatch();
 
  
@@ -32,14 +34,27 @@ function App() {
         type: "SET_USER",
         payload: response.data.userDetails,
       });
+
+      
+
     } catch (error) {
       console.error("Error checking user login status:", error);
+    }finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     isUserLoggedIn();
   }, []);
+
+  if(loading){
+    return (
+      
+        <Spinner/>
+    
+    );
+  }
 
   return (
     <>
