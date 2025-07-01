@@ -10,6 +10,7 @@ const  authMiddleware =  {
         
         try {
             const user = jwt.verify(token, process.env.JWT_SECRET_KEY);
+            // console.log("user from auth middleware", user);
             req.user = user;
             next();
         } catch (err) {

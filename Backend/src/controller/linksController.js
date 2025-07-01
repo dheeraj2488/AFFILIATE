@@ -4,12 +4,16 @@ const linksController = {
 
     create : async (req, res) => {
 
-        const {caompaignTitle, originalUrl, category} = req.body;
+        // console.log(req.body);
+
+        const {campaignTitle, originalUrl, category} = req.body;
 
         try {
+
+            //  console.log(req.user.id);
             
             const link = new Links({
-                campaignTitle: caompaignTitle, 
+                campaignTitle: campaignTitle, 
                 originalUrl: originalUrl,
                 category: category,
                 user: req.user.id
@@ -97,7 +101,7 @@ const linksController = {
                 });
             }
 
-            const { campaignTitle, originalUrl, category, thumbnail } = req.body;
+            const { campaignTitle, originalUrl, category } = req.body;
             link = await Links.findByIdAndUpdate(linkId, {
                 campaignTitle: campaignTitle,
                 originalUrl: originalUrl, 

@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
     name : {type: String , required: true, },
     isGoogleUser: { type: String, required: false },
     googleId: { type: String, required: false },
+    role:{type : String, default: "admin"},
+    adminId : {type : mongoose.Schema.Types.ObjectId, ref: 'Users', index: true},
 
 });
 
