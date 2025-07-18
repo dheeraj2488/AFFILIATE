@@ -52,16 +52,16 @@ const authController = {
       res.cookie("jwtToken", token, {
         //key and value and configuration
         httpOnly: true, //only server can change the details
-        secure: true, //will only be accesible on https
-        domain: "localhost", // specified domain
+        secure: process.env.NODE_ENV === 'production', //will only be accesible on https
         path: "/", //available on which path on the browser ,here it is available for all pages
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
       });
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        domain: "localhost",
+        secure: process.env.NODE_ENV === 'production',
         path: "/",
+         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
       });
 
       res.json({ message: "User authenticated", userDetails: userDetails });
@@ -131,9 +131,11 @@ const authController = {
 
       res.cookie("jwtToken", token, {
         httpOnly: true,
-        secure: true,
-        domain: "localhost",
+        secure: process.env.NODE_ENV === 'production',
         path: "/",
+         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
+
+
       });
 
 
@@ -192,16 +194,16 @@ const authController = {
 
       res.cookie("jwtToken", token, {
         //key and value and configuration
-        httpOnly: true, //only server can change the details
-        secure: true, //will only be accesible on https
-        domain: "localhost", // specified domain
-        path: "/", //available on which path on the browser ,here it is available for all pages
+       httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: "/",
+         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
       });
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: true,
-        domain: 'localhost',
-        path: '/'
+        secure: process.env.NODE_ENV === 'production',
+        path: "/",
+         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
     });
 
       res.json({ message: "User authenticated", userDetails: userDetails });
@@ -245,9 +247,9 @@ const authController = {
       // Send new token as httpOnly cookie
       response.cookie('jwtToken', newAccessToken, {
         httpOnly: true,
-        secure: false, // set to false in development if needed
-        domain: 'localhost', // change this in production
-        path: '/'
+        secure: process.env.NODE_ENV === 'production',
+        path: "/",
+         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
       });
 
       return response.json({
