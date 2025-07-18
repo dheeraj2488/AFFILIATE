@@ -7,13 +7,13 @@ const authorize = (requiredPermission)=>{
         if (!user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-
+      
         const userPermissions = permissions[user.role] || [];
-
+     
         if (!userPermissions.includes(requiredPermission)) {
             return res.status(403).json({ message: 'Forbidden: You do not have permission to perform this action' });
         }
-
+        // console.log("Authorization successful in authorizeMiddleware.js");
         next();
     };
 }

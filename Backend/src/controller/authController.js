@@ -3,29 +3,26 @@ const Users = require("../model/Users");
 const bcrypt = require("bcryptjs");
 const { OAuth2Client } = require("google-auth-library");
 const { validationResult } = require("express-validator");
+
 const authController = {
-
-
   login: async (req, res) => {
-   
     const errors = validationResult(req);
-  
+
     if (!errors.isEmpty()) {
       return res.status(401).json({ errors: errors.array() });
     }
     try {
       // these values are here becuase of express.json() middleware
       const { username, password } = req.body;
-    
-      
-      console.log("Recived req for : " , username);
+
+      console.log("Recived req for : ", username);
       const data = await Users.findOne({ email: username }); // if we will not use await code will move forward without waiting for fething the data
       console.log("Data fetched from DB : ", data);
       if (!data) {
         return res.status(401).json({ message: "User not found" });
       }
-     
-      const isMatch =await bcrypt.compare(password, data.password);
+
+      const isMatch = await bcrypt.compare(password, data.password);
 
       if (!isMatch) {
         return res.status(401).json({ message: "Invalid Credentials" });
@@ -35,11 +32,22 @@ const authController = {
         id: data._id,
         name: data.name,
         email: data.email,
+        role: data.role ? data.role : "admin", // default role if not set
+        adminId: data.adminId,
+        credits: data.credits,
       };
 
-      const token = jwt.sign( userDetails , process.env.JWT_SECRET_KEY, {
+      const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
         expiresIn: "1h",
       });
+
+      const refreshToken = jwt.sign(
+        userDetails,
+        process.env.JWT_REFRESH_TOKEN_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
 
       res.cookie("jwtToken", token, {
         //key and value and configuration
@@ -47,6 +55,13 @@ const authController = {
         secure: true, //will only be accesible on https
         domain: "localhost", // specified domain
         path: "/", //available on which path on the browser ,here it is available for all pages
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        domain: "localhost",
+        path: "/",
       });
 
       res.json({ message: "User authenticated", userDetails: userDetails });
@@ -57,97 +72,123 @@ const authController = {
   },
   logout: (req, res) => {
     res.clearCookie("jwtToken");
+    res.clearCookie("refreshToken");
     res.json({ success: true, message: "User logged out successfully" });
   },
-  isUserLoggedIn: (request, response) => {
+  isUserLoggedIn: async (request, response) => {
     const token = request.cookies.jwtToken;
 
     if (!token) {
       return response.status(401).json({ message: "Unauthorized access" });
     }
-    jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decodedSecret) => {
-      if (error) {
-        return response.status(401).json({ message: "Unauthorized access" });
-      } else {
-        return response.json({ userDetails: decodedSecret });
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET_KEY,
+      async (error, decodedSecret) => {
+        if (error) {
+          return response.status(401).json({ message: "Unauthorized access" });
+        } else {
+          const data = await Users.findById(decodedSecret.id);
+          return response.json({ userDetails: data });
+        }
       }
-    });
+    );
   },
 
-  register : async(req , res) =>{
-
-    try{  
-
-      const { username, password , name  } = req.body;
-      const encryptedPassword = await bcrypt.hash(password, 10);
+  register: async (req, res) => {
+    try {
+      const { name, username, password } = req.body;
 
       // Check if user already exists
       const existingUser = await Users.findOne({ email: username });
-      if( existingUser ) {
+      if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
+      const encryptedPassword = await bcrypt.hash(password, 10);
 
       const user = new Users({
-        email : username , 
-        password : encryptedPassword,
-        name : name
+        email: username,
+        password: encryptedPassword,
+        name: name,
+        role: "admin",
       });
 
       await user.save();
 
-      res.status(200).json({ success: true ,  message: "User registered successfully" });
+      const userDetails = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: "admin",
+        credits: user.credits,
+      };
 
-    }catch(err){
+      const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
+        expiresIn: "1h",
+      });
+    
+
+      res.cookie("jwtToken", token, {
+        httpOnly: true,
+        secure: true,
+        domain: "localhost",
+        path: "/",
+      });
+
+
+      res.json({ message: "User authenticated", userDetails: userDetails });
+    } catch (err) {
       console.log(err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
-  } , 
+  },
 
-  googleAuth : async (req, res) => {
-    
-    const {idToken } = req.body;
+  googleAuth: async (req, res) => {
+    const { idToken } = req.body;
 
-    if(!idToken){
+    if (!idToken) {
       return res.status(400).json({ message: "invalid request" });
     }
 
-    try{
-
+    try {
       const googleClinet = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
       const response = await googleClinet.verifyIdToken({
         idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID // Specify the CLIENT_ID of the app that accesses the backend
-      })
+        audience: process.env.GOOGLE_CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
+      });
 
       const payload = response.getPayload();
 
-      const { sub : googleId , email , name } = payload;  
+      const { sub: googleId, email, name } = payload;
 
-      let data = await Users.findOne({ eamil: email });
+      let data = await Users.findOne({ email: email });
 
-      if(!data){
+      if (!data) {
         //create new user
         data = new Users({
           email: email,
           name: name,
-          isGoogleUser : true , 
-          googleId: googleId
+          isGoogleUser: true,
+          googleId: googleId,
+          role: "admin",
         });
 
         await data.save();
       }
 
       const userDetails = {
-        id: data._id ? data._id : googleId , 
+        id: data._id ? data._id : googleId,
         name: data.name,
         email: data.email,
-
+        role: data.role ? data.role : "admin", // default role if not set
+        credits: data.credits,
       };
 
-      const token = jwt.sign({ userDetails }, process.env.JWT_SECRET_KEY, {
+      const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
         expiresIn: "1h",
       });
+      const refreshToken = jwt.sign(user, refreshSecret, { expiresIn: '7d' });
 
       res.cookie("jwtToken", token, {
         //key and value and configuration
@@ -156,16 +197,71 @@ const authController = {
         domain: "localhost", // specified domain
         path: "/", //available on which path on the browser ,here it is available for all pages
       });
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        domain: 'localhost',
+        path: '/'
+    });
 
       res.json({ message: "User authenticated", userDetails: userDetails });
-
-
-
-    }catch(err){
+    } catch (err) {
       console.log(err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
-  }
+  },
+  refreshToken: async (request, response) => {
+    try {
+      const refreshToken = request.cookies?.refreshToken;
+
+      if (!refreshToken) {
+        return response.status(401).json({ message: 'No refresh token' });
+      }
+
+      // Verify the refresh token
+      const decoded = await jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
+
+      // Find user by ID from token payload
+      console.log("Decoded refresh token:", decoded);
+
+      const data = await Users.findById({ _id: decoded.id });
+      if (!data) {
+        return response.status(404).json({ message: 'User not found' });
+      }
+
+      // Prepare payload for new access token
+      const user = {
+        id: data._id,
+        username: data.email,
+        name: data.name,
+        role: data.role || 'admin',
+        credits: data.credits,
+        subscription: data.subscription
+      };
+
+      // Generate new access token (short-lived)
+      const newAccessToken = jwt.sign(user, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+
+      // Send new token as httpOnly cookie
+      response.cookie('jwtToken', newAccessToken, {
+        httpOnly: true,
+        secure: false, // set to false in development if needed
+        domain: 'localhost', // change this in production
+        path: '/'
+      });
+
+      return response.json({
+        message: 'Token refreshed',
+        userDetails: user
+      });
+
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({
+        message: 'Internal server error'
+      });
+    }
+  },
 };
 
 module.exports = authController;

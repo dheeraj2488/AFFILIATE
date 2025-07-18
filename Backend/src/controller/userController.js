@@ -15,9 +15,10 @@ const generateRandomPassword = () => {
 };
 
 const userController = {
-  create: async (res, req) => {
+  create: async (req, res) => {
     try {
-      const { name, email, role } = req.body;
+      // console.log("Creating user with body:", req.body);
+      const { email , name, role } = req.body;
 
       if (!USER_ROLES.includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
@@ -32,6 +33,7 @@ const userController = {
         role: role,
         adminId: req.user._id, // assuming req.user is set by authentication middleware
       });
+      // console.log("User created:", user);
       try {
         await send(
           email,

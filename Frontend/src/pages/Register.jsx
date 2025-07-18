@@ -2,14 +2,17 @@ import React from 'react'
 import {useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 const Register = () => {
 
-    const navigate = useNavigate();
+   
     const serverEndpoint = import.meta.env.VITE_SERVER_ENDPOINT;
+    const dispatch = useDispatch();
     const [formData, setFormData]=useState({
+        name  : "",
         username:"",
-        password:"" , 
-        name  : ""
+        password:"" 
     });
 
     const [errors, setErrors]=useState({});
@@ -23,18 +26,18 @@ const Register = () => {
     try{
 
          const res = await axios.post(`${serverEndpoint}/auth/register`, formData , configuration);
-        //  console.log(res);
+            dispatch({
+                type: "SET_USER",
+                payload: res.data.userDetails,
+              });
 
-         if(res.data.success){
-            setErrors({});
             setFormData({
                 username:"",
                 password:"" , 
                 name  : ""
             });
             alert("user registered successfully");
-            navigate('/login');
-         }
+         
 
     }catch(err){
 
@@ -53,42 +56,114 @@ const Register = () => {
             [name]: value
         });
     };
+    const handleGoogleSignin = async (authResponse) => {
+        try {
+            const response = await axios.post(`${serverEndpoint}/auth/google-auth`, {
+                idToken: authResponse.credential
+            }, {
+                withCredentials: true
+            });
+
+            dispatch({
+                type: "SET_USER",
+                payload: response.data.userDetails
+            });
+        } catch (error) {
+            console.log(error);
+            setErrors({ message: 'Something went wrong while google signin' });
+        }
+    };
+
+    const handleGoogleSigninFailure = async (error) => {
+        console.log(error);
+        setErrors({ message: 'Something went wrong while google signin' });
+    };
   return (
-   <div className="container text-center">
-      <h1>Welcome to Register page</h1>
+    <div className="container py-5">
+    <div className="row justify-content-center">
+        <div className="col-md-4">
+            <h2 className="text-center mb-4">Sign up with a new account</h2>
 
-      {errors.message && errors.message}
+            {/* Error Alert */}
+            {errors.message && (
+                <div className="alert alert-danger" role="alert">
+                    {errors.message}
+                </div>
+            )}
 
-      <form onSubmit={handelSubmit}>
-        <div>
-            <label>Username:</label>
-            <input type="text" name="username" 
-            value={formData.username}
-            onChange={handleChange}
-            />
-            {errors.username &&(errors.username)}
+            <form onSubmit={handelSubmit}>
+                <div className="mb-3">
+                    <label htmlFor="name" className="form-label">Name</label>
+                    <input
+                        type="text"
+                        className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                    />
+                    {errors.name && (
+                        <div className="invalid-feedback">
+                            {errors.name}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="username" className="form-label">Username</label>
+                    <input
+                        type="text"
+                        className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                    />
+                    {errors.username && (
+                        <div className="invalid-feedback">
+                            {errors.username}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="password" className="form-label">Password</label>
+                    <input
+                        type="password"
+                        className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                    />
+                    {errors.password && (
+                        <div className="invalid-feedback">
+                            {errors.password}
+                        </div>
+                    )}
+                </div>
+
+                <div className="d-grid">
+                    <button type="submit" className="btn btn-primary">Submit</button>
+                </div>
+            </form>
+
+            <div className="text-center">
+                <div className="my-4 d-flex align-items-center text-muted">
+                    <hr className="flex-grow-1" />
+                    <span className="px-2">OR</span>
+                    <hr className="flex-grow-1" />
+                </div>
+                <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                    <GoogleLogin
+                        onSuccess={handleGoogleSignin}
+                        onError={handleGoogleSigninFailure}
+                    />
+                </GoogleOAuthProvider>
+            </div>
         </div>
-        <div>
-            <label>Password:</label>
-            <input type="password" name="password" 
-            value={formData.password}
-            onChange={handleChange}
-            
-            />
-            
-        </div>
-        <div>
-            <label>Name:</label>
-            <input type="text" name="name" 
-            value={formData.name}
-            onChange={handleChange}
-            />
-        </div>
-        <div>
-            <button type='submit'>Register</button>
-        </div>
-      </form>
     </div>
+</div>
   )
 }
 

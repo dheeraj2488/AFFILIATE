@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 function Header() {
+  const UserDetails = useSelector((state) => state.userDetails);
+
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary">
-      <div className="container-fluid">
+    <nav className="navbar navbar-expand-lg bg-dark navbar-dark">
+      <div className="container">
         <Link className="navbar-brand" to="/">
-          Home
+         Affiliate++
         </Link>
         <button
           className="navbar-toggler"
@@ -17,11 +21,18 @@ function Header() {
         >
           <span className="navbar-toggler-icon" />
         </button>
-        <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div className="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
           <div className="navbar-nav">
-            <Link className="nav-link" to="/login">
-              Login
-            </Link>
+            {!UserDetails && (
+              <Link className="nav-link" to="/login">
+                Login
+              </Link>
+            )}
+            {UserDetails && (
+              <Link className="nav-link" to="/logout">
+                Logout
+              </Link>
+            )}
           </div>
         </div>
       </div>

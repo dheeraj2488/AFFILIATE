@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
-
+const subscriptionSchema = new mongoose.Schema({
+    id: { type: String }, // Razorpay subscription id
+    status: { type: String, default: 'pending' },
+    start: { type: Date },
+    end: { type: Date },
+    lastBillDate: { type: Date },
+    nextBillDate: { type: Date },
+    paymentsMade: { type: Number },
+    paymentsRemaining: { type: Number }
+});
 const userSchema = new mongoose.Schema({
     email : { type: String ,required: true, unique: true},
     password : { type: String ,required: false},
@@ -16,6 +25,9 @@ const userSchema = new mongoose.Schema({
     //role :viewer : id : 8910, adminId : 1234
 
     // so these both developer and viewer are under admin 1234
+
+    credits: {type : Number, default: 0}, 
+    subscription: { type: subscriptionSchema, default: () => ({}) }
 });
 
 const Users = mongoose.model('Users', userSchema);

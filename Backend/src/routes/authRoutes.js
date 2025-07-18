@@ -17,4 +17,5 @@ router.post('/logout' , authController.logout);
 router.get('/isUserLoggedIn', authController.isUserLoggedIn);
 router.post('/register' ,loginValidator ,  authController.register);
 router.post('/google-auth', authController.googleAuth);
+router.post('/refresh-token', authController.refreshToken);
 module.exports = router;

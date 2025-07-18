@@ -7,7 +7,7 @@ function Dashboard() {
     <div className='container text-center'>
 
         <LinkDashboard/>
-        <Link to='/logout'> Logout </Link>
+
     </div>
   )
 }

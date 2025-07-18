@@ -6,7 +6,11 @@ import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Modal from "react-bootstrap/Modal";
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import { usePermission } from "../../rbac/permissions";
+import { useNavigate } from 'react-router-dom';
 const LinkDashboard = () => {
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [linksData, setLinksData] = useState([]);
   const [formData, setFormData] = useState({
@@ -17,6 +21,8 @@ const LinkDashboard = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+
+  const permissions = usePermission();
 
   const handelModalShow = (isEdit, data = {}) => {
     if (isEdit) {
@@ -133,7 +139,14 @@ const LinkDashboard = () => {
 
         fetchLinks();
       } catch (err) {
-        setErrors({ message: "something went wrong , please try again" });
+        if (err.response?.data?.code == "INSUFFICENT_FUNDS") {
+          setErrors({
+            message: `You don't have enough credits to create a link
+            Add funds to your account using manage payment option`,
+          });
+        } else {
+          setErrors({ message: "something went wrong , please try again" });
+        }
       } finally {
         handelModalClose();
       }
@@ -180,39 +193,46 @@ const LinkDashboard = () => {
     {
       field: "action",
       headerName: "Action",
-      width: 180,
+      flex: 1,
       renderCell: (params) => (
         <div>
-          <IconButton>
-            <EditIcon onClick={() => handelModalShow(true, params.row)} />
-          </IconButton>
-          <IconButton>
-            <DeleteIcon onClick={() => handleDeleteModalShow(params.row._id)} />
-          </IconButton>
+          {permissions.canEditLink && (
+            <IconButton>
+              <EditIcon onClick={() => handelModalShow(true, params.row)} />
+            </IconButton>
+          )}
+          {permissions.canDeleteLink && (
+            <IconButton>
+              <DeleteIcon
+                onClick={() => handleDeleteModalShow(params.row._id)}
+              />
+            </IconButton>
+          )}
+           {permissions.canViewLink && (
+                        <IconButton>
+                            <AssessmentIcon onClick={() => {
+                                navigate(`/analytics/${params.row._id}`);
+                            }} />
+                        </IconButton>
+                    )}
         </div>
       ),
     },
   ];
 
-  const handelEdit = (row) => {
-    // Handle edit functionality here
-    console.log("Edit clicked for row: ", row);
-
-    // try{
-
-    // }
-  };
-
   return (
     <div className="conatiner py-4">
       <div className="d-flex justify-content-between mb-3">
         <h2>Manage Affiliate Links</h2>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => handelModalShow(false)}
-        >
-          Add
-        </button>
+
+        {permissions.canCreateLink && (
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => handelModalShow(false)}
+          >
+            Add
+          </button>
+        )}
       </div>
 
       {errors.message && (
@@ -321,13 +341,13 @@ const LinkDashboard = () => {
           <button
             className="btn btn-secondary"
             onClick={() => setShowDeleteModal()}
-          ></button>
-          <button
-            className="btn btn-danger"
-            onClick={handleDeleteSubmit}
-          ></button>
+          >
+            Cancel
+          </button>
+          <button className="btn btn-danger" onClick={handleDeleteSubmit}>
+            Delete
+          </button>
         </Modal.Footer>
-        +
       </Modal>
     </div>
   );

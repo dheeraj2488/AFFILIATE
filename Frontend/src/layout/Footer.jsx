@@ -2,7 +2,7 @@ function Footer(){
     return(
 
         <div className="container">
-            Footer Component
+            ALl rights reserved.
         </div>
     );
 }
