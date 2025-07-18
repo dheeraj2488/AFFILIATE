@@ -156,6 +156,14 @@ function Login() {
                 Register here
               </a>
             </div>
+            <div className="text-center mt-2">
+              <a
+                href="/forgot-password"
+                className="text-primary text-decoration-underline"
+              >
+                Forgot Password?
+              </a>
+            </div>
           </form>
 
           <div className="text-center">
