@@ -18,4 +18,6 @@ router.get('/isUserLoggedIn', authController.isUserLoggedIn);
 router.post('/register' ,loginValidator ,  authController.register);
 router.post('/google-auth', authController.googleAuth);
 router.post('/refresh-token', authController.refreshToken);
+router.post('/send-reset-token', authController.sendResetPasswordToken);
+router.post('/reset-password', authController.resetPassword);
 module.exports = router;

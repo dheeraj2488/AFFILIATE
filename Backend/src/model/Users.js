@@ -27,7 +27,9 @@ const userSchema = new mongoose.Schema({
     // so these both developer and viewer are under admin 1234
 
     credits: {type : Number, default: 0}, 
-    subscription: { type: subscriptionSchema, default: () => ({}) }
+    subscription: { type: subscriptionSchema, default: () => ({}) },
+    resetPasswordCode: String,
+    resetPasswordExpiry: Date,
 });
 
 const Users = mongoose.model('Users', userSchema);
