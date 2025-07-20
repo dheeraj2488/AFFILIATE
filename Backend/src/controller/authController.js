@@ -71,8 +71,14 @@ const authController = {
     }
   },
   logout: (req, res) => {
-    res.clearCookie("jwtToken");
-    res.clearCookie("refreshToken");
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+      path: "/",
+    };
+    res.clearCookie("jwtToken" , cookieOptions);
+    res.clearCookie("refreshToken" , cookieOptions);
     res.json({ success: true, message: "User logged out successfully" });
   },
   isUserLoggedIn: async (request, response) => {
