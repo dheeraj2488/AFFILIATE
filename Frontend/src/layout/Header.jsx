@@ -9,7 +9,7 @@ function Header() {
 
     <nav className="navbar navbar-expand-lg bg-dark navbar-dark">
     <div className="container-fluid">
-      <a className="navbar-brand fw-bold text-white" href="#">Affiliate++</a>
+      <a className="navbar-brand fw-bold text-white" href="/">Affiliate++</a>
    
     </div>
   
