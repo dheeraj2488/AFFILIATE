@@ -22,7 +22,7 @@ const LinkDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-  const permissions = usePermission();
+  const permissions = usePermission(); // custom hook to get permissions
 
   const handelModalShow = (isEdit, data = {}) => {
     if (isEdit) {

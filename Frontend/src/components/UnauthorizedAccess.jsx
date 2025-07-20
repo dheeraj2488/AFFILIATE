@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 function UnauthorizedAccess() {
     return (
       <div className="container text-center py-5">
@@ -7,6 +8,7 @@ function UnauthorizedAccess() {
           <br />
           Please contact your administrator.
         </p>
+        <Link to='/'  className="btn btn-secondary"> Go home </Link>
       </div>
     );
   }
