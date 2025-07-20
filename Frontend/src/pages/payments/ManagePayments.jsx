@@ -4,6 +4,7 @@ import Subscription from "./Subscription";
 import PendingConfirmation from "./PendingConfirmation";
 function ManagePayments() {
   const userDetails = useSelector((state) => state.userDetails);
+  console.log(userDetails)
   const confirmationStatus = ["created", "pending", "authenticated"];
   if (userDetails.subscription?.status === "active") {
     return <Subscription />;

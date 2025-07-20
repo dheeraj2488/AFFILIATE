@@ -1,10 +1,30 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Can from "../rbac/Can";
-
+import { serverEndpoint } from "../config";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 function UserHeader() {
   const userDetails = useSelector((state) => state.userDetails);
+  const navigate = useNavigate();
+  const handleResetPassword = async () => {
+    try {
+      const response = await axios.post(`${serverEndpoint}/auth/send-reset-token`, {
+        email: userDetails.email,
+      });
 
+      alert("Reset code sent to your email.");
+      navigate("/reset-password", {
+        state: {
+          email: userDetails.email,
+          isLoggedIn: true,
+        },
+      });
+    } catch (err) {
+      console.error("Error sending reset code:", err);
+      alert(err.response?.data?.message || "Failed to send reset code.");
+    }
+  };
   return (
     <nav
       className="navbar navbar-expand-lg bg-dark border-bottom border-body"
@@ -56,6 +76,15 @@ function UserHeader() {
                     </Link>
                   </li>
                 </Can>
+
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={handleResetPassword}
+                  >
+                    Reset Password
+                  </button>
+                </li>
 
                 <hr className="m-0" />
                 <li>

@@ -51,7 +51,6 @@ function Login() {
           formData,
           configuration
         );
-        //  console.log(response);
         dispatch({
           type: "SET_USER",
           payload: response.data.userDetails,

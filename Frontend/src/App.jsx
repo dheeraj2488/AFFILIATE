@@ -213,8 +213,26 @@ function App() {
           }
         />
 
-        <Route path="/forgot-password" element={<ForgetPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="/forgot-password"
+          element={
+            UserDetails ? (
+              <Navigate to="/dashboard" />
+            ) : (
+              <AppLayout>
+                <ForgetPassword />
+              </AppLayout>
+            )
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <AppLayout>
+              <ResetPassword />
+            </AppLayout>
+          }
+        />
       </Routes>
     </>
   );

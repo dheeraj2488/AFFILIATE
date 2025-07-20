@@ -26,7 +26,6 @@ function Subscription() {
 
   const subscription = userDetails.subscription;
   const isCancelling = subscription?.status === 'cancel_requested' || subscription?.status === 'pending_cancel';
-  console.log("Subscription Details while cancelling:", isCancelling);
 
   const handleCancel = async () => {
     try {
