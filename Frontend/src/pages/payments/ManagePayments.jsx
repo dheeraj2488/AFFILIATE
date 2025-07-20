@@ -8,7 +8,7 @@ function ManagePayments() {
   const confirmationStatus = ["created", "pending", "authenticated"];
   if (userDetails.subscription?.status === "active") {
     return <Subscription />;
-  } else if (confirmationStatus.includes(userDetails?.subscription?.status)) {
+  } else if (confirmationStatus.includes(userDetails.subscription?.status)) {
     return <PendingConfirmation />;
   } else {
     return <PurchaseCredit />;

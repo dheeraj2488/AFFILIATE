@@ -74,7 +74,8 @@ function Login() {
         },
         { withCredentials: true }
       );
-
+      
+      console.log("Google Signin Response:", response.data);
       dispatch({
         type: "SET_USER",
         payload: response.data.userDetails,
