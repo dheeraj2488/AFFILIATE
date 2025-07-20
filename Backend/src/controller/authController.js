@@ -190,7 +190,7 @@ const authController = {
       const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
         expiresIn: "1h",
       });
-      const refreshToken = jwt.sign(userDetails, refreshSecret, { expiresIn: '7d' });
+      const refreshToken = jwt.sign(userDetails, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
       res.cookie("jwtToken", token, {
         //key and value and configuration
