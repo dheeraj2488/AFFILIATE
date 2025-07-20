@@ -103,7 +103,7 @@ const paymentController = {
             const { subscription_id } = request.body;
             const subscription = await razorpay.subscriptions.fetch(subscription_id);
             const user = await Users.findById(request.user.id);
-
+           
             user.subscription = {
                 id: subscription_id,
                 planId: subscription.plan_id,

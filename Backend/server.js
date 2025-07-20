@@ -27,8 +27,6 @@ app.use((request, response, next) => {
 app.use(cookieParser());
 
 
-
-
 const corsOptions = {
   origin : process.env.CLIENT_ENDPOINT ,  // 
   credentials : true, //allow cookies to be sent

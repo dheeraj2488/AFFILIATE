@@ -17,7 +17,7 @@ const generateRandomPassword = () => {
 const userController = {
   create: async (req, res) => {
     try {
-      // console.log("Creating user with body:", req.body);
+      console.log("Creating user with body:", req.body);
       const { email , name, role } = req.body;
 
       if (!USER_ROLES.includes(role)) {

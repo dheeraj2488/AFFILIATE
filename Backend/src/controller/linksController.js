@@ -16,30 +16,36 @@ const linksController = {
 
 
             const user = await Users.findById({_id : req.user.id});
-            if(user.credits < 1){
-                return res.status(400).json({
-                    code: 'INSUFFICENT_FUNDS',
-                    message : 'Insufficent credits'
+            console.log(user);
+
+            if(user.credits >= 1 || user?.subscription?.status == 'active') {
+                
+                const link = new Links({
+                    campaignTitle: campaignTitle, 
+                    originalUrl: originalUrl,
+                    category: category,
+                    user : req.user.role == 'admin' ? req.user.id : req.user.adminId, // if user is admin then he can create link for any user otherwise only for himself
                 });
+    
+               if(user.credits >= 1 ) user.credits -= 1; // Decrement the user's credits by 1
+    
+                await user.save(); 
+                await link.save();
+
+                res.status(200).json({
+                    data : {id : link._id , message : 'Link created successfully'},
+                });
+               
+            }else{
+
+                return res.status(400).json({
+                    code : "INSUFFICENT_FUNDS",
+                    message: "You don't have enough credits to create a link. Please purchase credits or subscribe to a plan."
+                })
             }
             
-            const link = new Links({
-                campaignTitle: campaignTitle, 
-                originalUrl: originalUrl,
-                category: category,
-                user : req.user.role == 'admin' ? req.user.id : req.user.adminId, // if user is admin then he can create link for any user otherwise only for himself
-            });
-
-            user.credits -= 1; // Decrement the user's credits by 1
-
-            await user.save(); 
-            await link.save();
-
             
-            console.log("credits of users" , user.credits)
-            res.status(200).json({
-                data : {id : link._id , message : 'Link created successfully'},
-            });
+            // console.log("credits of users" , user.credits)
             
         } catch (error) {
             console.log(error) ;
