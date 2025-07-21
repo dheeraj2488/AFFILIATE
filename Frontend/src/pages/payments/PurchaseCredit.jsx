@@ -47,10 +47,8 @@ function PurchaseCredit() {
               },
               { withCredentials: true }
             );
-            
-            console.log("Purchase successful:", data);
 
-            dispatch({ type: "SET_USER", payload: data });
+            dispatch({ type: "SET_USER", payload: data.user });
             setMessage(`${credits} credits added!`);
           } catch (error) {
             console.error(error);

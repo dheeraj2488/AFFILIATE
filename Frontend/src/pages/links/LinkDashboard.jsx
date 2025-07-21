@@ -24,6 +24,21 @@ const LinkDashboard = () => {
 
   const permissions = usePermission(); // custom hook to get permissions
 
+  const [loading , setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage , setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(2);
+  const [totalCount , setTotalCount] = useState(0);
+  //MUI DataGrid require array of fields as the sort model when using server side sorting.
+    //When using client-side pagination/sorting/filter/search, MUI takes care of everything
+    //abstracting implementation details. Since we are now managing data using server, 
+    //we need to manage everything and let DataGrid know what is happening.
+    const [sortModel, setSortModel] = useState([
+        { field: 'createdAt', sort: 'desc' }
+    ]);
+
+
+
   const handelModalShow = (isEdit, data = {}) => {
     if (isEdit) {
       setFormData({
@@ -154,23 +169,41 @@ const LinkDashboard = () => {
   };
   const fetchLinks = async () => {
     try {
+      setLoading(true);
+      const sortField = sortModel[0]?.field || 'createdAt';
+      const sortOrder = sortModel[0]?.sort || 'desc';
+      // we are doing server side pagination, sorting and searching 
+      //it helps to reduce the amount of data sent to the client and improve performance
+      // for example we have 1000 links and we want to show only 20 links per page that is why pagination is used
+      const params = {
+        currentPage : currentPage,
+        pageSize: pageSize,
+        searchTerm: searchTerm,
+        sortField: sortField,
+        sortOrder: sortOrder,
+      }
       const response = await axios.get(`${serverEndpoint}/links`, {
+        params : params,
         withCredentials: true,
       });
-      // console.log("link data" , response.data);
-      setLinksData(response.data.data);
+      // console.log("link data" , response.data.data);
+      setLinksData(response.data.data.links);
+      setTotalCount(response.data.data.total);
+
     } catch (error) {
       console.log(error);
 
       setErrors({
         message: "Unable to fetchlinks at the moment, please try again",
       });
+    }finally{
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchLinks();
-  }, []);
+  }, [currentPage , pageSize, searchTerm, sortModel]);
 
   const columns = [
     { field: "campaignTitle", headerName: "Campaign", flex: 2 },
@@ -193,7 +226,7 @@ const LinkDashboard = () => {
     {
       field: "action",
       headerName: "Action",
-      flex: 1,
+      flex: 1, sortable : false,
       renderCell: (params) => (
         <div>
           {permissions.canEditLink && (
@@ -218,6 +251,23 @@ const LinkDashboard = () => {
         </div>
       ),
     },
+    {
+      field: 'share',
+            headerName: 'Share Affiliate Link',
+            sortable: false,
+            flex: 1.5,
+            renderCell: (params) => {
+                const shareUrl = `${serverEndpoint}/links/r/${params.row._id}`;
+                return (
+                    <button
+                        className='btn btn-outline-primary btn-sm'
+                        onClick={(e) => {
+                            navigator.clipboard.writeText(shareUrl);
+                        }}
+                    >Copy</button>
+                );
+            }
+    }
   ];
 
   return (
@@ -241,6 +291,15 @@ const LinkDashboard = () => {
         </div>
       )}
 
+      <div className="mb-2">
+        <input type="text" className="form-control" placeholder="Enter Campaign title , Original Url , or Category"
+          onChange={(e)=>{
+            setSearchTerm(e.target.value);
+            setCurrentPage(0); // Reset to first page on new search
+          }}
+        />
+      </div>
+
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid
           rows={linksData}
@@ -251,11 +310,29 @@ const LinkDashboard = () => {
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 20,
-                page: 0,
+                pageSize: pageSize,
+                page: currentPage,
               },
             },
           }}
+          paginationMode="server"
+          pageSizeOptions={[2,3,4]}
+          onPaginationModelChange={(newPage)=>{
+            setCurrentPage(newPage.page);
+            setPageSize(newPage.pageSize);
+          }}
+          onPageSizeChange={(newPageSize) => {
+            setPageSize(newPageSize);
+            setCurrentPage(0); // Reset to first page on page size change
+          }}
+          rowCount={ totalCount } 
+          sortingMode="server"
+          sortModel={sortModel}
+          onSortModelChange={(model) => {
+            setSortModel(model);
+            setCurrentPage(0); // Reset to first page on sort change
+          }}
+          loading={loading}
           disableRowSelectionOnClick
           showToolbar
           sx={{

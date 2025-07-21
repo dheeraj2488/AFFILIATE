@@ -163,7 +163,7 @@ function App() {
           path="/users"
           element={
             UserDetails ? (
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["admin" , "viewer"]}>
                 <UserLayout>
                   <ManageUsers />
                 </UserLayout>
