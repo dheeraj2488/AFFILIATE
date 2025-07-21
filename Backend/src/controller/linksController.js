@@ -57,11 +57,37 @@ const linksController = {
 
     getAll : async (req, res) => {
         try {
+
+            const { 
+                currentPage  = 0 , pageSize = 10,  // pagination
+                searchTerm='', // searching 
+                sortField = 'createdAt'  , sortOrder = 'desc' // sorting
+            } =  req.query;
+
+            const skip = parseInt(currentPage) * parseInt(pageSize);
+            const limit = parseInt(pageSize);
+            const sort = {[sortField]: sortOrder === 'asc' ? -1 : 1}; // sorting order - in mongo db 1 means ascending and -1 means descending order
+
+
             const userId =  req.user.role == 'admin' ? req.user.id : req.user.adminId; // if user is admin then he can get links of any user otherwise only his own links
-            const links = await Links.find({ user:userId}).sort({createdAt: -1});
+
+            const query = {
+                user : userId
+            };
+            
+            if(searchTerm){
+                //it is a javascript regex (regular expression ) function to search in title, category and originalUrl
+                query.$or = [
+                    { campaignTitle : new RegExp(searchTerm , 'i') }, // i represents case-insensitive search
+                    { category: new RegExp(searchTerm , 'i') },
+                    { originalUrl: new RegExp(searchTerm , 'i') }
+                ];
+            }
+            const links = await Links.find(query).sort(sort).skip(skip).limit(limit);
+            const total = await Links.countDocuments(query);
 
             return res.status(200).json({
-                data: links,
+                data: { links , total},
             });
         } catch (error) {
             console.log(error);

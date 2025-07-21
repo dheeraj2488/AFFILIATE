@@ -54,7 +54,8 @@ const userController = {
 
   getAll: async (req, res) => {
     try {
-      const users = await Users.find({ adminId: req.user._id });
+      const users = await Users.find({ adminId: req.user._id }); // need a change for viewer he can see the links made my his admin
+      
       res.json(users);
     } catch (err) {
       console.error("Error fetching users:", err);

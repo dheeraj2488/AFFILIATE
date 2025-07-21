@@ -59,6 +59,7 @@ const paymentController = {
             const user = await Users.findById({ _id : req.user._id});
         
             user.credits += Number(credits); // here we are adding the credits to the user credits
+            
             await user.save(); // here we are saving the user data to the database
 
 
