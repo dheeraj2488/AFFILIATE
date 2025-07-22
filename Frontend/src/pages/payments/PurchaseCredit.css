@@ -67,15 +67,18 @@
   
   /* Card */
   .ezy__pricing10-card {
-    transition: 0.4s;
-    background-color: var(--ezy-card-bg);
+    background-color: #1f203d;
+    transition: all 0.3s ease-in-out;
+    will-change: transform, box-shadow;
   }
   
   .ezy__pricing10-card:hover {
-    background-color: var(--bs-body-bg);
-    box-shadow: var(--ezy-card-box-shadow);
-    transform: translateX(0) translateY(-5px) translateZ(0) rotate(0deg) scale(1);
+    background-color: #1b1a1a;  
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4); /* more prominent shadow */
+    transform: translateY(-10px) scale(1.05); /* more pop */
+    z-index: 10;
   }
+  
   
   /* Icon */
   .ezy__pricing10-card-icon {
@@ -85,13 +88,15 @@
   
   /* Price Display */
   .ezy__pricing10-meta-price {
-    color: var(--bs-body-color);
+    color:#fff;
+    /* color: var(--bs-body-color); */
     line-height: 60px;
   }
   
   .ezy__pricing10-period,
   .ezy__pricing10-currency {
     font-size: 22px;
+    
   }
   
   .ezy__pricing10-currency {
@@ -106,7 +111,7 @@
   
   /* Feature List */
   .ezy__pricing10-nav li {
-    color: var(--bs-body-color);
+    color:#fff;
     font-size: 18px;
     opacity: 0.8;
   }

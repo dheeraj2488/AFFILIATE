@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { serverEndpoint } from "../../config";
 import { Modal } from "react-bootstrap";
-
+import { toast } from "react-hot-toast";
+import { useSelector } from "react-redux";
 const USER_ROLES = ["viewer", "developer"];
 
 function ManageUsers() {
@@ -22,6 +23,7 @@ function ManageUsers() {
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const UserDetails = useSelector((state) => state.userDetails);
 
   const handleModalShow = (isEdit, data = {}) => {
     if (isEdit) {
@@ -61,6 +63,7 @@ function ManageUsers() {
       await axios.delete(`${serverEndpoint}/users/${formData.id}`, {
         withCredentials: true,
       });
+      toast.success("User Deleted successfully");
       setFormData({ email: "", role: "", name: "" });
       fetchUsers();
     } catch (error) {
@@ -123,19 +126,26 @@ function ManageUsers() {
 
       try {
         if (isEdit) {
+          // console.log("Updating user with ID:", formData.id);
           await axios.put(
             `${serverEndpoint}/users/${formData.id}`,
             body,
             configuration
           );
+          toast.success("User updated successfully");
         } else {
           await axios.post(`${serverEndpoint}/users`, body, configuration);
+          toast.success("User added successfully");
         }
 
         setFormData({ email: "", name: "", role: "" });
         fetchUsers();
       } catch (error) {
-        setErrors({ message: "Something went wrong, please try again" });
+        if (error.response && error.response.request.status === 400) {
+          setErrors({ message: error.response.data.message });
+        } else {
+          setErrors({ message: "Something went wrong, please try again" });
+        }
       } finally {
         handleModalClose();
         setFormLoading(false);
@@ -189,12 +199,14 @@ function ManageUsers() {
     <div className="container py-4">
       <div className="d-flex justify-content-between mb-3">
         <h2>Manage Users</h2>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => handleModalShow(false)}
-        >
-          Add
-        </button>
+        {UserDetails?.role === "admin" && (
+          <button
+            className="btn btn-danger btn-sm"
+            onClick={() => handleModalShow(false)}
+          >
+            Add
+          </button>
+        )}
       </div>
 
       {errors.message && (
@@ -227,7 +239,12 @@ function ManageUsers() {
           <Modal.Title>{isEdit ? "Edit User" : "Add User"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={handleSubmit}>
+          {UserDetails.role !== "admin" ? (
+            <div className="alert alert-danger" role="alert">
+              You do not have permission to add or edit users.
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -296,12 +313,14 @@ function ManageUsers() {
                   </span>
                 </button>
               ) : (
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-danger">
                   Submit
                 </button>
               )}
             </div>
           </form>
+          )}
+          
         </Modal.Body>
       </Modal>
 
@@ -310,7 +329,19 @@ function ManageUsers() {
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this user?</Modal.Body>
+        <Modal.Body>
+          {UserDetails.role !== "admin" ? (
+            <div className="alert alert-danger" role="alert">
+              You do not have permission to delete users.
+            </div>
+          ) : (
+            <p>
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </p>
+          )
+        }
+        </Modal.Body>
         <Modal.Footer>
           <button
             className="btn btn-secondary"
@@ -318,7 +349,7 @@ function ManageUsers() {
           >
             Cancel
           </button>
-          {formLoading ? (
+          {formLoading  ? (
             <button className="btn btn-danger" type="button" disabled>
               <span
                 className="spinner-border spinner-border-sm"
@@ -329,9 +360,13 @@ function ManageUsers() {
               </span>
             </button>
           ) : (
-            <button className="btn btn-danger" onClick={handleDeleteSubmit}>
+
+             UserDetails.role === "admin" && (
+              <button className="btn btn-danger" onClick={handleDeleteSubmit}>
               Delete
             </button>
+            )
+            
           )}
         </Modal.Footer>
       </Modal>

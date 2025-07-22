@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { serverEndpoint } from '../config';
-
+import {toast} from 'react-hot-toast';
 const ResetPassword = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,8 +29,11 @@ const ResetPassword = () => {
     setMessage('');
 
     try {
-      await axios.post(`${serverEndpoint}/auth/reset-password`, formData);
-      setMessage('Password reset successfully! Redirecting to login page...');
+      await toast.promise( axios.post(`${serverEndpoint}/auth/reset-password`, formData) , {
+        loading: 'Resetting password...',
+        success: 'Password reset successfully!',
+        error: (err) => err?.response?.data?.message || 'Failed to reset password.'
+      });
 
       if (isLoggedIn) {
         // Redirect back to dashboard if logged in
@@ -46,7 +49,11 @@ const ResetPassword = () => {
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
-      <form onSubmit={handleSubmit} className="p-4 shadow rounded bg-white" style={{ minWidth: 350 }}>
+      <form onSubmit={handleSubmit} className="p-4 shadow rounded " style={{ minWidth: 350 }}>
+      <div
+        className="border border-dark rounded shadow p-4"
+        style={{ backgroundColor: "#1f203d" }}
+      >
         <h3 className="text-center mb-3">Reset Password</h3>
 
         {message && (
@@ -62,6 +69,7 @@ const ResetPassword = () => {
               name="email"
               type="email"
               className="form-control"
+              style={{ backgroundColor: "#2a2b53" }}
               value={formData.email}
               onChange={handleChange}
               required
@@ -74,7 +82,8 @@ const ResetPassword = () => {
           <input
             name="code"
             type="text"
-            className="form-control"
+            className="form-control text-white border border-secondary"
+            style={{ backgroundColor: "#2a2b53" }}
             value={formData.code}
             onChange={handleChange}
             required
@@ -85,17 +94,19 @@ const ResetPassword = () => {
           <label className="form-label">New Password</label>
           <input
             name="newPassword"
-            type="password"
-            className="form-control"
+            type="password" 
+            className="form-control text-white border border-secondary"
+            style={{ backgroundColor: "#2a2b53" }}
             value={formData.newPassword}
             onChange={handleChange}
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-success w-100">
+        <button type="submit" className="btn btn-danger w-100">
           Reset Password
         </button>
+      </div>
       </form>
     </div>
   );

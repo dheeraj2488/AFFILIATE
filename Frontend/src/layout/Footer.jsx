@@ -5,9 +5,8 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="container-fluid bg-light text-center py-4 border-top">
-
-      <div className="text-muted small">
+    <div className="container-fluid  text-center py-4 ">
+      <div className="small text-white mt-6">
         &copy; {currentYear} Affiliate Link Manager | All rights reserved.
       </div>
     </div>

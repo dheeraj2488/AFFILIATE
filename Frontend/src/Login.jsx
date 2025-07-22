@@ -4,6 +4,7 @@ import axios from "axios";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { serverEndpoint } from "../src/config";
 import { useDispatch } from "react-redux";
+import { toast } from 'react-hot-toast';
 function Login() {
   const [formData, setFormData] = useState({
     username: "",
@@ -55,6 +56,7 @@ function Login() {
           type: "SET_USER",
           payload: response.data.userDetails,
         });
+        toast.success("Login successful");
       } catch (err) {
         if (err?.response?.status === 401) {
           setErrors({ message: "Invalid credentials" });
@@ -80,6 +82,7 @@ function Login() {
         type: "SET_USER",
         payload: response.data.userDetails,
       });
+      toast.success("Login successful");
     } catch (error) {
       console.log(error);
       setErrors({ message: "something went wrong , please try again" });
@@ -92,17 +95,20 @@ function Login() {
   };
   return (
     <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-4">
+    <div className="row justify-content-center">
+      <div className="col-md-6 col-lg-5">
+  
+        
+        <div className="border border-dark rounded shadow p-4"  style={{ backgroundColor: '#1f203d'}}>
           <h1 className="text-center mb-4">Login Page</h1>
-
+  
           {/* Error Alert */}
           {errors.message && (
             <div className="alert alert-danger" role="alert">
               {errors.message}
             </div>
           )}
-
+  
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
@@ -110,9 +116,8 @@ function Login() {
               </label>
               <input
                 type="text"
-                className={`form-control ${
-                  errors.username ? "is-invalid" : ""
-                }`}
+                className={`form-control ${errors.username ? "is-invalid" : ""} text-white border border-secondary `}
+                style={{ backgroundColor: '#2a2b53'}}
                 id="username"
                 name="username"
                 value={formData.username}
@@ -122,16 +127,15 @@ function Login() {
                 <div className="invalid-feedback">{errors.username}</div>
               )}
             </div>
-
+  
             <div className="mb-3">
               <label htmlFor="password" className="form-label">
                 Password
               </label>
               <input
                 type="password"
-                className={`form-control ${
-                  errors.password ? "is-invalid" : ""
-                }`}
+                className={`form-control ${errors.password ? "is-invalid" : ""}  text-white border border-secondary`}
+                style={{ backgroundColor: '#2a2b53'}}
                 id="password"
                 name="password"
                 value={formData.password}
@@ -141,41 +145,35 @@ function Login() {
                 <div className="invalid-feedback">{errors.password}</div>
               )}
             </div>
-
+  
             <div className="d-grid">
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn btn-danger ">
                 Login
               </button>
             </div>
+  
             <div className="text-center mt-3">
               <span>Don't have an account? </span>
-              <a
-                href="/register"
-                className="text-primary text-decoration-underline"
-              >
+              <a href="/register" className="text-secondary text-decoration-underline">
                 Register here
               </a>
             </div>
+  
             <div className="text-center mt-2">
-              <a
-                href="/forgot-password"
-                className="text-primary text-decoration-underline"
-              >
+              <a href="/forgot-password" className="text-secondary text-decoration-underline">
                 Forgot Password?
               </a>
             </div>
           </form>
-
+  
           <div className="text-center">
             <div className="my-4 d-flex align-items-center text-muted">
-              <hr className="flex-grow-1" />
-              <span className="px-2">OR</span>
-              <hr className="flex-grow-1" />
+              <hr className="flex-grow-1 border-white" />
+              <span className="px-2 text-white">OR</span>
+              <hr className="flex-grow-1 border-white" />
             </div>
-
-            <GoogleOAuthProvider
-              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-            >
+  
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
               <GoogleLogin
                 onSuccess={handelGoogleSigin}
                 onError={handleGoogleSigninFailure}
@@ -185,6 +183,8 @@ function Login() {
         </div>
       </div>
     </div>
+  </div>
+  
   );
 }
 

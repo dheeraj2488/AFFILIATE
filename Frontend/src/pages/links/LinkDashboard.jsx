@@ -6,9 +6,10 @@ import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Modal from "react-bootstrap/Modal";
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { usePermission } from "../../rbac/permissions";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 const LinkDashboard = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
@@ -23,21 +24,23 @@ const LinkDashboard = () => {
   const [isEdit, setIsEdit] = useState(false);
 
   const permissions = usePermission(); // custom hook to get permissions
+  
+  //file upload variables
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [previewUrl, setpreviewUrl] = useState("");
 
-  const [loading , setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage , setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(2);
-  const [totalCount , setTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   //MUI DataGrid require array of fields as the sort model when using server side sorting.
-    //When using client-side pagination/sorting/filter/search, MUI takes care of everything
-    //abstracting implementation details. Since we are now managing data using server, 
-    //we need to manage everything and let DataGrid know what is happening.
-    const [sortModel, setSortModel] = useState([
-        { field: 'createdAt', sort: 'desc' }
-    ]);
-
-
+  //When using client-side pagination/sorting/filter/search, MUI takes care of everything
+  //abstracting implementation details. Since we are now managing data using server,
+  //we need to manage everything and let DataGrid know what is happening.
+  const [sortModel, setSortModel] = useState([
+    { field: "createdAt", sort: "desc" },
+  ]);
 
   const handelModalShow = (isEdit, data = {}) => {
     if (isEdit) {
@@ -46,6 +49,7 @@ const LinkDashboard = () => {
         campaignTitle: data.campaignTitle,
         originalUrl: data.originalUrl,
         category: data.category,
+        thumbnail : data.thumbnail
       });
     } else {
       setFormData({
@@ -134,15 +138,27 @@ const LinkDashboard = () => {
         withCredentials: true, // it is used to send cookies with the request
       };
 
+      console.log("form data", body);
+
       try {
+        setLoading(true);
+        // If thumbnailFile is selected, upload it to Cloudinary and add the URL to the body
+        let thumbnailUrl = "";
+        if (thumbnailFile) {
+          thumbnailUrl = await uploadToCloudinary(thumbnailFile);
+          body.thumbnail = thumbnailUrl; // Add the thumbnail URL to the body
+        }
+        // console.log("thumbnailUrl", thumbnailUrl);
         if (isEdit) {
           await axios.put(
             `${serverEndpoint}/links/${formData.id}`,
             body,
             configuration
           );
+          toast.success("Link Edited Successfully")
         } else {
           await axios.post(`${serverEndpoint}/links`, body, configuration);
+          toast.success("Link Added Successfully")
         }
 
         setErrors({});
@@ -152,7 +168,10 @@ const LinkDashboard = () => {
           category: "",
         });
 
+        setThumbnailFile(null); // Reset the thumbnail file after submission
+        setpreviewUrl(""); // Reset the preview URL after submission
         fetchLinks();
+        setLoading(false);
       } catch (err) {
         if (err.response?.data?.code == "INSUFFICENT_FUNDS") {
           setErrors({
@@ -164,53 +183,91 @@ const LinkDashboard = () => {
         }
       } finally {
         handelModalClose();
+        setLoading(false);
       }
     }
   };
+
+  const uploadToCloudinary = async (file) => {
+    const { data } = await axios.post(
+      `${serverEndpoint}/links/generate-upload-signature`,
+      {},
+      { withCredentials: true }
+    );
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", data.apiKey);
+    formData.append("timestamp", data.timestamp);
+    formData.append("signature", data.signature);
+
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${data.cloudName}/image/upload`,
+      formData
+    );
+
+    return response.data.secure_url; // Return the URL of the uploaded image and we will store this URL in the database
+  };
+
   const fetchLinks = async () => {
     try {
       setLoading(true);
-      const sortField = sortModel[0]?.field || 'createdAt';
-      const sortOrder = sortModel[0]?.sort || 'desc';
-      // we are doing server side pagination, sorting and searching 
+      const sortField = sortModel[0]?.field || "createdAt";
+      const sortOrder = sortModel[0]?.sort || "desc";
+      // we are doing server side pagination, sorting and searching
       //it helps to reduce the amount of data sent to the client and improve performance
       // for example we have 1000 links and we want to show only 20 links per page that is why pagination is used
       const params = {
-        currentPage : currentPage,
+        currentPage: currentPage,
         pageSize: pageSize,
         searchTerm: searchTerm,
         sortField: sortField,
         sortOrder: sortOrder,
-      }
+      };
       const response = await axios.get(`${serverEndpoint}/links`, {
-        params : params,
+        params: params,
         withCredentials: true,
       });
       // console.log("link data" , response.data.data);
       setLinksData(response.data.data.links);
       setTotalCount(response.data.data.total);
-
     } catch (error) {
       console.log(error);
 
       setErrors({
         message: "Unable to fetchlinks at the moment, please try again",
       });
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchLinks();
-  }, [currentPage , pageSize, searchTerm, sortModel]);
+  }, [currentPage, pageSize, searchTerm, sortModel]);
 
   const columns = [
-    { field: "campaignTitle", headerName: "Campaign", flex: 2 },
+    {
+      field: "thumbnail",
+      headerName: "Thumbnail",
+      width: 250,
+      sortable: false,
+      renderCell: (params) => (
+        params.row.thumbnail ? (
+          <img
+            src={params.row.thumbnail}
+            alt="Thumbnail"
+            style={{ maxHeight: "45px" }}
+          />
+        ) : (
+          <span style={{ color: "#888" }}> No Image</span>
+        )
+      ),
+    },
+    { field: "campaignTitle", headerName: "Campaign",width: 150},
     {
       field: "originalUrl",
       headerName: "URL",
-      flex: 3,
+      width: 250,
       renderCell: (params) => (
         <a
           href={`${serverEndpoint}/links/r/${params.row._id}`}
@@ -221,14 +278,15 @@ const LinkDashboard = () => {
         </a>
       ),
     },
-    { field: "category", headerName: "Category", flex: 2 },
-    { field: "clickCount", headerName: "Clicks", flex: 1 },
+    { field: "category", headerName: "Category", width: 200, },
+    { field: "clickCount", headerName: "Clicks", width: 100, },
     {
       field: "action",
       headerName: "Action",
-      flex: 1, sortable : false,
+      width: 200,
+      sortable: false,
       renderCell: (params) => (
-        <div>
+        <div >
           {permissions.canEditLink && (
             <IconButton>
               <EditIcon onClick={() => handelModalShow(true, params.row)} />
@@ -241,33 +299,38 @@ const LinkDashboard = () => {
               />
             </IconButton>
           )}
-           {permissions.canViewLink && (
-                        <IconButton>
-                            <AssessmentIcon onClick={() => {
-                                navigate(`/analytics/${params.row._id}`);
-                            }} />
-                        </IconButton>
-                    )}
+          {permissions.canViewLink && (
+            <IconButton>
+              <AssessmentIcon
+                onClick={() => {
+                  navigate(`/analytics/${params.row._id}`);
+                }}
+              />
+            </IconButton>
+          )}
         </div>
       ),
     },
     {
-      field: 'share',
-            headerName: 'Share Affiliate Link',
-            sortable: false,
-            flex: 1.5,
-            renderCell: (params) => {
-                const shareUrl = `${serverEndpoint}/links/r/${params.row._id}`;
-                return (
-                    <button
-                        className='btn btn-outline-primary btn-sm'
-                        onClick={(e) => {
-                            navigator.clipboard.writeText(shareUrl);
-                        }}
-                    >Copy</button>
-                );
-            }
-    }
+      field: "share",
+      headerName: "Share Affiliate Link",
+      sortable: false,
+      flex : 1,
+      renderCell: (params) => {
+        const shareUrl = `${serverEndpoint}/links/r/${params.row._id}`;
+        return (
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={(e) => {
+              navigator.clipboard.writeText(shareUrl);
+              toast.success("Affiliate link copied to clipboard");
+            }}
+          >
+            Copy
+          </button>
+        );
+      },
+    },
   ];
 
   return (
@@ -277,7 +340,7 @@ const LinkDashboard = () => {
 
         {permissions.canCreateLink && (
           <button
-            className="btn btn-primary btn-sm"
+            className="btn btn-danger btn-sm"
             onClick={() => handelModalShow(false)}
           >
             Add
@@ -292,8 +355,11 @@ const LinkDashboard = () => {
       )}
 
       <div className="mb-2">
-        <input type="text" className="form-control" placeholder="Enter Campaign title , Original Url , or Category"
-          onChange={(e)=>{
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Enter Campaign title , Original Url , or Category"
+          onChange={(e) => {
             setSearchTerm(e.target.value);
             setCurrentPage(0); // Reset to first page on new search
           }}
@@ -316,8 +382,8 @@ const LinkDashboard = () => {
             },
           }}
           paginationMode="server"
-          pageSizeOptions={[2,3,4]}
-          onPaginationModelChange={(newPage)=>{
+          pageSizeOptions={[2, 3, 4]}
+          onPaginationModelChange={(newPage) => {
             setCurrentPage(newPage.page);
             setPageSize(newPage.pageSize);
           }}
@@ -325,7 +391,7 @@ const LinkDashboard = () => {
             setPageSize(newPageSize);
             setCurrentPage(0); // Reset to first page on page size change
           }}
-          rowCount={ totalCount } 
+          rowCount={totalCount}
           sortingMode="server"
           sortModel={sortModel}
           onSortModelChange={(model) => {
@@ -400,9 +466,42 @@ const LinkDashboard = () => {
                 <div className="invalid-feedback">{errors.category}</div>
               )}
             </div>
+
+            <div className="mb-3">
+              <label htmlFor="thumbnailFile" className="form-control">
+                Thumbnail
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+
+                  if (file) {
+                    setThumbnailFile(file);
+                    setpreviewUrl(URL.createObjectURL(file)); // Create a preview URL for the selected file
+                  } else {
+                    setpreviewUrl(""); // Reset preview URL if no file is selected
+                  }
+                }}
+                className="form-control"
+              />
+
+              {previewUrl && (
+                <div className="mt-2">
+                  <img
+                    src={previewUrl}
+                    width="150"
+                    alt="Thumbnail Preview"
+                    className="img-responsive border rounded-2"
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="d-grid">
-              <button type="submit" className="btn btn-primary">
-                Add
+              <button type="submit" className="btn btn-danger"  disabled={loading}>
+              {loading ? "Loading..." : "Submit"}
               </button>
             </div>
           </form>

@@ -19,6 +19,7 @@ import ManagePayments from "./pages/payments/ManagePayments";
 import AnalyticsDashboard from "./pages/links/AnalyticsDashboard";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
+import { Toaster } from "react-hot-toast";
 function App() {
   const UserDetails = useSelector((state) => state.userDetails);
   const [loading, setLoading] = useState(true);
@@ -85,13 +86,14 @@ function App() {
 
   return (
     <>
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route
           path="/"
           element={
             UserDetails ? (
               <UserLayout>
-                <Navigate to="/dashboard" />
+                <Navigate to="/dashboard" replace />
               </UserLayout>
             ) : (
               <AppLayout>
@@ -104,7 +106,7 @@ function App() {
           path="/login"
           element={
             UserDetails ? (
-              <Navigate to="/dashboard" />
+              <Navigate to="/dashboard" replace />
             ) : (
               <AppLayout>
                 <Login />
@@ -121,14 +123,14 @@ function App() {
                 <Dashboard />
               </UserLayout>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         />
 
         <Route
           path="/logout"
-          element={UserDetails ? <Logout /> : <Navigate to="/login" />}
+          element={UserDetails ? <Logout /> : <Navigate to="/login" replace />}
         ></Route>
 
         <Route
@@ -150,7 +152,7 @@ function App() {
           path="/register"
           element={
             UserDetails ? (
-              <Navigate to="/dashboard" />
+              <Navigate to="/dashboard" replace />
             ) : (
               <AppLayout>
                 <Register />
@@ -163,13 +165,13 @@ function App() {
           path="/users"
           element={
             UserDetails ? (
-              <ProtectedRoute roles={["admin" , "viewer"]}>
+              <ProtectedRoute roles={["admin", "viewer"]}>
                 <UserLayout>
                   <ManageUsers />
                 </UserLayout>
               </ProtectedRoute>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         ></Route>
@@ -182,7 +184,7 @@ function App() {
                 <UnauthorizedAccess />
               </UserLayout>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -191,11 +193,13 @@ function App() {
           path="/manage-payment"
           element={
             UserDetails ? (
-              <UserLayout>
-                <ManagePayments />
-              </UserLayout>
+              <ProtectedRoute roles={["admin", "viewer"]}>
+                <UserLayout>
+                  <ManagePayments />
+                </UserLayout>
+              </ProtectedRoute>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -204,11 +208,13 @@ function App() {
           path="/analytics/:linkId"
           element={
             UserDetails ? (
+              <ProtectedRoute roles={["admin", "viewer"]}>
               <UserLayout>
                 <AnalyticsDashboard />
               </UserLayout>
+              </ProtectedRoute>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         />

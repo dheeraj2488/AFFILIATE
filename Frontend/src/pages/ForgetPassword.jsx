@@ -23,39 +23,52 @@ const ForgetPassword = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <form
-        onSubmit={handleSubmit}
-        className="p-4 shadow rounded bg-white"
-        style={{ minWidth: 350 }}
+    <div className="container d-flex flex-column justify-content-center align-items-center vh-100">
+    <p className="text-center text-white fs-5  px-3">
+      Forgot your password? <span className="text-info">Don’t worry!</span> We’ll send you a code to reset it — quick and easy.
+      <br />
+      Enter your email to get a reset link
+    </p>
+  
+    <form
+      onSubmit={handleSubmit}
+      className="p-4 shadow rounded mt-4"
+      style={{ minWidth: 350 }}
+    >
+      <div
+        className="border border-dark rounded shadow p-4"
+        style={{ backgroundColor: "#1f203d" }}
       >
-        <h3 className="text-center mb-3">Forgot Password</h3>
-
+        <h3 className="text-center mb-3 text-white">Forgot Password</h3>
+  
         {message && (
           <div className="alert alert-info" role="alert">
             {message}
           </div>
         )}
-
+  
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">
+          <label htmlFor="email" className="form-label text-white">
             Email address
           </label>
           <input
             type="email"
-            className="form-control"
+            className="form-control text-white border border-white"
+            style={{ backgroundColor: "#2a2b53" }}
             id="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-
+  
         <button type="submit" className="btn btn-primary w-100">
           Send Code
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
+  </div>
+  
   );
 };
 

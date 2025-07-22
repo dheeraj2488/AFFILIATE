@@ -3,9 +3,9 @@ import { CREDIT_PACKS, PLAN_IDS, pricingList } from "../../config/payments";
 import { useState } from "react";
 import axios from "axios";
 import { serverEndpoint } from "../../config";
-// import { SET_USER } from "../../redux/user/actions";
 import "./PurchaseCredit.css";
 import { Modal } from "react-bootstrap";
+import { toast } from "react-hot-toast";
 
 function PurchaseCredit() {
   const dispatch = useDispatch();
@@ -16,8 +16,6 @@ function PurchaseCredit() {
 
   const subscriptionStatus = userDetails.subscription?.status;
   console.log("Subscription Status:", subscriptionStatus);
-  const isSubscriptionPending =
-    subscriptionStatus === "created" || subscriptionStatus === "authenticated";
 
   const handleBuyCredits = async (credits) => {
     setShowModal(false);
@@ -49,7 +47,7 @@ function PurchaseCredit() {
             );
 
             dispatch({ type: "SET_USER", payload: data.user });
-            setMessage(`${credits} credits added!`);
+            toast.success(`${credits} credits added!`);
           } catch (error) {
             console.error(error);
             setErrors({
@@ -91,7 +89,7 @@ function PurchaseCredit() {
             );
 
             dispatch({ type: "SET_USER", payload: user.data.user });
-            setMessage("Subscription activated");
+            toast.success("Subscription activated");
           } catch (error) {
             setErrors({
               message: "Unable to activate subscription, please try again",
@@ -135,7 +133,7 @@ function PurchaseCredit() {
 
         <div className="row">
           {/* Credit Pack Card */}
-          <div className="col-md-6 col-xl-4 mt-4 text-center">
+          <div className="col-md-6 col-xl-4 mt-4 text-center ">
             <div className="card ezy__pricing10-card p-4 border-0 rounded-0">
               <div className="card-body pt-4">
                 <p className="ezy__pricing10-meta-price">
@@ -151,7 +149,7 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-danger mt-3"
                   onClick={() => setShowModal(true)}
                 >
                   Buy Credits
@@ -177,7 +175,7 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-danger mt-3"
                   onClick={() => handleSubscribe("UNLIMITED_MONTHLY")}
                 >
                   Subscribe Monthly
@@ -203,7 +201,7 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-danger mt-3"
                   onClick={() => handleSubscribe("UNLIMITED_YEARLY")}
                 >
                   Subscribe Yearly
@@ -214,7 +212,7 @@ function PurchaseCredit() {
         </div>
 
         {/* React-Bootstrap Modal */}
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal  show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>Buy Credits</Modal.Title>
           </Modal.Header>
@@ -222,7 +220,7 @@ function PurchaseCredit() {
             {CREDIT_PACKS.map((c) => (
               <button
                 key={c}
-                className="m-2 btn btn-outline-primary"
+                className="m-2 btn btn-danger"
                 onClick={() => handleBuyCredits(c)}
               >
                 Buy {c} Credits

@@ -109,7 +109,7 @@ function AnalyticsDashboard() {
 
     useEffect(() => {
         fetchLinkAnalytics();
-    }, [analyticsData, fromDate, toDate]);
+    }, [fromDate, toDate]);
 
     return (
         <div className='container py-5'>

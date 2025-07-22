@@ -13,8 +13,8 @@ function HomePage() {
     <>
       {/* Main Section */}
       <div
-        className="container-fluid bg-primary text-white min-vh-100 d-flex flex-column justify-content-center align-items-center text-center py-5"
-        style={{ paddingTop: "100px" }}
+        className="container-fluid  text-white min-vh-100 d-flex flex-column justify-content-center align-items-center text-center py-5"
+        style={{ paddingTop: "100px" , backgroundColor: '#03001C' } }
       >
         <div className="mb-5" data-aos="fade-down">
           <h1 className="display-3 fw-bold mb-3">Affiliate Link Manager</h1>
@@ -30,7 +30,7 @@ function HomePage() {
             </Link>
 
             <div className="ms-auto">
-              <a href="#about" className="btn  btn-lg mt-3">
+              <a href="#about" className="btn btn-lg mt-3 btn-outline-light ">
                 About
               </a>
             </div>
