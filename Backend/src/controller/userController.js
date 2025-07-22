@@ -17,11 +17,16 @@ const generateRandomPassword = () => {
 const userController = {
   create: async (req, res) => {
     try {
-      console.log("Creating user with body:", req.body);
+      // console.log("Creating user with body:", req.body);
       const { email , name, role } = req.body;
 
       if (!USER_ROLES.includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
+      }
+
+      const existingUser = await Users.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: "User already registered" });
       }
 
       const temporaryPassword = generateRandomPassword();
@@ -54,7 +59,9 @@ const userController = {
 
   getAll: async (req, res) => {
     try {
-      const users = await Users.find({ adminId: req.user._id }); // need a change for viewer he can see the links made my his admin
+      const adminId = req.user.role === 'viewer' ? req.user.adminId : req.user._id;
+      // const users = await Users.find({ adminId: req.user._id || req.user.adminId }); // need a change for viewer he can see the links made my his admin
+      const users = await Users.find({ adminId });
       
       res.json(users);
     } catch (err) {
@@ -71,8 +78,8 @@ const userController = {
         return res.status(400).json({ message: "Invalid role" });
       }
 
-      const user = await Users.find({ _id: id, adminId: req.user._id });
-
+      const user = await Users.findOne({ _id: id, adminId: req.user._id });
+      // console.log("User found:", user);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

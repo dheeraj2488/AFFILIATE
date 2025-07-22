@@ -3,14 +3,15 @@ const Users = require('../model/Users');
 const Clicks = require('../model/Clicks');
 const axios = require('axios'); 
 const { getDeviceInfo } = require("../util/linksUtility");
+const { generateUploadSignature }  = require('../service/cloudinaryService');
 const linksController = {
 
     create : async (req, res) => {
 
-        // console.log(req.body);
+        console.log(req.body);
 
-        const {campaignTitle, originalUrl, category} = req.body;
-       
+        const {campaignTitle, originalUrl, category ,thumbnail} = req.body;
+        
 
         try {
 
@@ -24,6 +25,7 @@ const linksController = {
                     campaignTitle: campaignTitle, 
                     originalUrl: originalUrl,
                     category: category,
+                    thumbnail: thumbnail,
                     user : req.user.role == 'admin' ? req.user.id : req.user.adminId, // if user is admin then he can create link for any user otherwise only for himself
                 });
     
@@ -152,11 +154,12 @@ const linksController = {
                 });
             }
 
-            const { campaignTitle, originalUrl, category } = req.body;
+            const { campaignTitle, originalUrl, category , thumbnail } = req.body;
             link = await Links.findByIdAndUpdate(linkId, {
                 campaignTitle: campaignTitle,
                 originalUrl: originalUrl, 
                 category: category , 
+                thumbnail: thumbnail
                 
             }, {
                 new: true, // Return the updated document
@@ -272,9 +275,9 @@ const linksController = {
                 });
             }
 
-            const userId = request.user.role === 'admin'
+            const userId = request.user.role === 'admin' 
                 ? request.user.id
-                : request.user.adminId;
+                : request.user.adminId?.toString();
             if (link.user.toString() !== userId) {
                 return response.status(403).json({ error: 'Unauthorized access' });
             }
@@ -296,6 +299,29 @@ const linksController = {
             });
         }
     },
+
+    createUploadSignature : async (req, res) => {
+       
+        try {
+
+            const {signature , timestamp } =  generateUploadSignature();
+            
+            res.json({
+                timestamp : timestamp,
+                signature : signature,
+                apiKey : process.env.CLOUDINARY_API_KEY,
+                cloudName : process.env.CLOUDINARY_CLOUD_NAME,
+            })
+
+            
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                error: 'Internal server error',
+            });
+            
+        }
+    }
 };
 
 module.exports = linksController;

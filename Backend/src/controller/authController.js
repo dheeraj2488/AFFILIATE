@@ -15,7 +15,6 @@ const authController = {
       // these values are here becuase of express.json() middleware
       const { username, password } = req.body;
 
-      console.log("Recived req for : ", username);
       const data = await Users.findOne({ email: username }); // if we will not use await code will move forward without waiting for fething the data
       console.log("Data fetched from DB : ", data);
       if (!data) {
@@ -28,14 +27,27 @@ const authController = {
         return res.status(401).json({ message: "Invalid Credentials" });
       }
 
-      const userDetails = {
+      let userDetails = {
         id: data._id,
         name: data.name,
         email: data.email,
         role: data.role ? data.role : "admin", // default role if not set
         adminId: data.adminId,
         credits: data.credits,
+        subscription: data.subscription ? data.subscription : null,
+
       };
+
+      if (userDetails.role === "viewer" && userDetails.adminId) {
+        const admin = await Users.findById(userDetails.adminId);
+        
+        if (admin) {
+          userDetails = {
+            ...userDetails,
+            adminSubscription: admin.subscription,
+          };
+        }
+      } 
 
       const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
         expiresIn: "1h",
@@ -94,7 +106,23 @@ const authController = {
         if (error) {
           return response.status(401).json({ message: "Unauthorized access" });
         } else {
-          const data = await Users.findById(decodedSecret.id);
+          const user = await Users.findById(decodedSecret.id);
+          if (!user) {
+            return response.status(404).json({ message: "User not found" });
+          }
+          
+          // this we are doing because the viewer can see the admins subscription details if any
+          let data = user;
+          if (user.role === "viewer" && user.adminId) {
+            const admin = await Users.findById(user.adminId);
+            
+            if (admin) {
+              data = {
+                ...user.toObject(),
+                adminSubscription: admin.subscription,
+              };
+            }
+          } 
           return response.json({ userDetails: data });
         }
       }
@@ -191,6 +219,7 @@ const authController = {
         email: data.email,
         role: data.role ? data.role : "admin", // default role if not set
         credits: data.credits,
+        subscription : data.subscription ? data.subscription : null,
       };
 
       const token = jwt.sign(userDetails, process.env.JWT_SECRET_KEY, {
