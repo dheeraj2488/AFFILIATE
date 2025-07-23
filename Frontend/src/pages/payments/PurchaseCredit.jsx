@@ -6,13 +6,16 @@ import { serverEndpoint } from "../../config";
 import "./PurchaseCredit.css";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function PurchaseCredit() {
   const dispatch = useDispatch();
   const userDetails = useSelector((state) => state.userDetails);
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCredits, setshowCredits] = useState(false);
+
+
 
   const subscriptionStatus = userDetails.subscription?.status;
   console.log("Subscription Status:", subscriptionStatus);
@@ -113,7 +116,6 @@ function PurchaseCredit() {
         {errors.message && (
           <div className="alert alert-danger">{errors.message}</div>
         )}
-        {message && <div className="alert alert-success">{message}</div>}
 
         <div className="text-left d-flex justify-content-between align-items-start w-100">
           <div>
@@ -124,10 +126,19 @@ function PurchaseCredit() {
           </div>
 
           <div className="text-right">
-            <h3>Current Balance</h3>
-            <p className="ezy__pricing10-sub-heading mt-3">
-              {userDetails.credits} Credits
-            </p>
+            <h3 className="text-lg font-semibold">Current Balance</h3>
+
+            <div className="d-flex items-center mt-3 gap-3">
+              <p className="ezy__pricing10-sub-heading text-lg font-bold">
+                {showCredits ? `₹ ${userDetails.credits}` : "******"}
+              </p>
+              <span
+                onClick={() => setshowCredits((prev) => !prev)}
+                style={{ cursor: "pointer" }}
+              >
+               {showCredits ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -149,7 +160,8 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-danger mt-3"
+                  className="btn btn-outline-light mt-3"
+                  style={{ backgroundColor: "#0dcaf0" }}
                   onClick={() => setShowModal(true)}
                 >
                   Buy Credits
@@ -175,7 +187,8 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-danger mt-3"
+                  className="btn btn-outline-light mt-3"
+                  style={{ backgroundColor: "#0dcaf0" }}
                   onClick={() => handleSubscribe("UNLIMITED_MONTHLY")}
                 >
                   Subscribe Monthly
@@ -201,8 +214,9 @@ function PurchaseCredit() {
                   ))}
                 </ul>
                 <button
-                  className="btn btn-danger mt-3"
+                  className="btn btn-outline-light mt-3"
                   onClick={() => handleSubscribe("UNLIMITED_YEARLY")}
+                  style={{ backgroundColor: "#0dcaf0" }}
                 >
                   Subscribe Yearly
                 </button>
@@ -212,7 +226,7 @@ function PurchaseCredit() {
         </div>
 
         {/* React-Bootstrap Modal */}
-        <Modal  show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>Buy Credits</Modal.Title>
           </Modal.Header>
@@ -220,7 +234,7 @@ function PurchaseCredit() {
             {CREDIT_PACKS.map((c) => (
               <button
                 key={c}
-                className="m-2 btn btn-danger"
+                className="m-2 btn btn-info"
                 onClick={() => handleBuyCredits(c)}
               >
                 Buy {c} Credits

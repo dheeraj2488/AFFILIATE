@@ -153,7 +153,7 @@ const Register = () => {
             </div>
 
             <div className="d-grid">
-              <button type="submit" className="btn btn-danger">
+              <button type="submit" className="btn" style={{backgroundColor: '#0dcaf0'}}>
                 Submit
               </button>
             </div>

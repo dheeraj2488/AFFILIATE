@@ -96,7 +96,7 @@ function Login() {
   return (
     <div className="container py-5">
     <div className="row justify-content-center">
-      <div className="col-md-6 col-lg-5">
+      <div className="col-md-4">
   
         
         <div className="border border-dark rounded shadow p-4"  style={{ backgroundColor: '#1f203d'}}>
@@ -147,7 +147,7 @@ function Login() {
             </div>
   
             <div className="d-grid">
-              <button type="submit" className="btn btn-danger ">
+              <button type="submit" className="btn " style={{backgroundColor: '#0dcaf0'}}>
                 Login
               </button>
             </div>

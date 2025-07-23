@@ -48,11 +48,19 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="container d-flex flex-column justify-content-center align-items-center vh-100">
+
+<p className="text-center text-white fs-5  px-3">
+        Please enter your <span className="text-info">Reset Code</span>{" "}
+        sent to your email. <br />
+        &
+        <br />
+        Enter your new password to reset it.
+      </p>
       <form onSubmit={handleSubmit} className="p-4 shadow rounded " style={{ minWidth: 350 }}>
       <div
         className="border border-dark rounded shadow p-4"
-        style={{ backgroundColor: "#1f203d" }}
+        style={{backgroundColor: '#0dcaf0'}}
       >
         <h3 className="text-center mb-3">Reset Password</h3>
 
@@ -68,7 +76,7 @@ const ResetPassword = () => {
             <input
               name="email"
               type="email"
-              className="form-control"
+              className="form-control text-white border border-secondary"
               style={{ backgroundColor: "#2a2b53" }}
               value={formData.email}
               onChange={handleChange}

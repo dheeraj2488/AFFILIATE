@@ -201,7 +201,8 @@ function ManageUsers() {
         <h2>Manage Users</h2>
         {UserDetails?.role === "admin" && (
           <button
-            className="btn btn-danger btn-sm"
+            className="btn btn-outline-light btn-sm"
+            style={{ backgroundColor: "#0dcaf0" }}
             onClick={() => handleModalShow(false)}
           >
             Add
@@ -245,82 +246,85 @@ function ManageUsers() {
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="text"
-                className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {errors.email && (
-                <div className="invalid-feedback">{errors.email}</div>
-              )}
-            </div>
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                {errors.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
+                )}
+              </div>
 
-            <div className="mb-3">
-              <label htmlFor="name" className="form-label">
-                Name
-              </label>
-              <input
-                type="text"
-                className={`form-control ${errors.name ? "is-invalid" : ""}`}
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-              {errors.name && (
-                <div className="invalid-feedback">{errors.name}</div>
-              )}
-            </div>
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.name ? "is-invalid" : ""}`}
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+                {errors.name && (
+                  <div className="invalid-feedback">{errors.name}</div>
+                )}
+              </div>
 
-            <div className="mb-3">
-              <label htmlFor="role" className="form-label">
-                Role
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className={`form-control ${errors.role ? "is-invalid" : ""}`}
-              >
-                <option value="">Select</option>
-                {USER_ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </option>
-                ))}
-              </select>
-              {errors.role && (
-                <div className="invalid-feedback">{errors.role}</div>
-              )}
-            </div>
+              <div className="mb-3">
+                <label htmlFor="role" className="form-label">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className={`form-control ${errors.role ? "is-invalid" : ""}`}
+                >
+                  <option value="">Select</option>
+                  {USER_ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                {errors.role && (
+                  <div className="invalid-feedback">{errors.role}</div>
+                )}
+              </div>
 
-            <div className="d-grid">
-              {formLoading ? (
-                <button className="btn btn-primary" type="button" disabled>
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    aria-hidden="true"
-                  />
-                  <span className="visually-hidden" role="status">
-                    Loading...
-                  </span>
-                </button>
-              ) : (
-                <button type="submit" className="btn btn-danger">
-                  Submit
-                </button>
-              )}
-            </div>
-          </form>
+              <div className="d-grid">
+                {formLoading ? (
+                  <button className="btn btn-primary" type="button" disabled>
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      aria-hidden="true"
+                    />
+                    <span className="visually-hidden" role="status">
+                      Loading...
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="btn  btn-outline-light"
+                    style={{ backgroundColor: "#0dcaf0" }}
+                  >
+                    Submit
+                  </button>
+                )}
+              </div>
+            </form>
           )}
-          
         </Modal.Body>
       </Modal>
 
@@ -339,8 +343,7 @@ function ManageUsers() {
               Are you sure you want to delete this user? This action cannot be
               undone.
             </p>
-          )
-        }
+          )}
         </Modal.Body>
         <Modal.Footer>
           <button
@@ -349,7 +352,7 @@ function ManageUsers() {
           >
             Cancel
           </button>
-          {formLoading  ? (
+          {formLoading ? (
             <button className="btn btn-danger" type="button" disabled>
               <span
                 className="spinner-border spinner-border-sm"
@@ -360,13 +363,11 @@ function ManageUsers() {
               </span>
             </button>
           ) : (
-
-             UserDetails.role === "admin" && (
+            UserDetails.role === "admin" && (
               <button className="btn btn-danger" onClick={handleDeleteSubmit}>
-              Delete
-            </button>
+                Delete
+              </button>
             )
-            
           )}
         </Modal.Footer>
       </Modal>

@@ -340,7 +340,8 @@ const LinkDashboard = () => {
 
         {permissions.canCreateLink && (
           <button
-            className="btn btn-danger btn-sm"
+            className="btn btn-sm btn-outline-light"
+            style={{backgroundColor: '#0dcaf0'}}
             onClick={() => handelModalShow(false)}
           >
             Add
@@ -500,7 +501,7 @@ const LinkDashboard = () => {
             </div>
 
             <div className="d-grid">
-              <button type="submit" className="btn btn-danger"  disabled={loading}>
+              <button type="submit" className="btn btn-outline-light"  disabled={loading} style={{backgroundColor: '#0dcaf0'}}>
               {loading ? "Loading..." : "Submit"}
               </button>
             </div>
